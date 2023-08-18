@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0js7lqe" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.14.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.19.0">
+  <bpmn:process id="validator" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:serviceTask id="inn_len_val" name="Inn length Validating" camunda:class="com.example.makolpaschikov.delegate.InnLengthValidatingDelegator" camunda:delegateExpression="">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_1tqndck</bpmn:incoming>
+      <bpmn:outgoing>Flow_17vy02e</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_1fud9jm">
+      <bpmn:incoming>Flow_17vy02e</bpmn:incoming>
+      <bpmn:outgoing>Flow_0r34f6m</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0cr7yj9</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_17vy02e" sourceRef="inn_len_val" targetRef="Gateway_1fud9jm" />
+    <bpmn:serviceTask id="region_code_val" name="Region Validating" camunda:class="com.example.makolpaschikov.delegate.RegionNumberValidatingDelegator" camunda:delegateExpression="">
+      <bpmn:incoming>Flow_0r34f6m</bpmn:incoming>
+      <bpmn:outgoing>Flow_1mutt2s</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0r34f6m" sourceRef="Gateway_1fud9jm" targetRef="region_code_val">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${result==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:startEvent id="start-event">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="inn" label="ИНН" type="string">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+          </camunda:formField>
+          <camunda:formField id="regionCode" label="Регион" type="long">
+            <camunda:validation>
+              <camunda:constraint name="required" />
+            </camunda:validation>
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_0qw66yv</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="capital_val" name="Capital Validating" camunda:class="com.example.makolpaschikov.delegate.CapitalValidatingDelegator" camunda:delegateExpression="">
+      <bpmn:incoming>Flow_10yefp0</bpmn:incoming>
+      <bpmn:outgoing>Flow_1iv36dq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="inn_start_val" name="Inn Start Validating" camunda:class="com.example.makolpaschikov.delegate.InnStartValidatingDelegator" camunda:delegateExpression="">
+      <bpmn:incoming>Flow_0kru7wm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0rhhgz9</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_02dglol">
+      <bpmn:incoming>Flow_1mutt2s</bpmn:incoming>
+      <bpmn:outgoing>Flow_10yefp0</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0rpmwer</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1mutt2s" sourceRef="region_code_val" targetRef="Gateway_02dglol" />
+    <bpmn:sequenceFlow id="Flow_10yefp0" sourceRef="Gateway_02dglol" targetRef="capital_val">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${result==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_145sdep">
+      <bpmn:incoming>Flow_1iv36dq</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kru7wm</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1hlygg7</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1iv36dq" sourceRef="capital_val" targetRef="Gateway_145sdep" />
+    <bpmn:sequenceFlow id="Flow_0kru7wm" sourceRef="Gateway_145sdep" targetRef="inn_start_val">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${result==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="finish-event">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="com.example.makolpaschikov.delegate.ProcessFinishingDelegator" event="start" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0rpmwer</bpmn:incoming>
+      <bpmn:incoming>Flow_0rhhgz9</bpmn:incoming>
+      <bpmn:incoming>Flow_0cr7yj9</bpmn:incoming>
+      <bpmn:incoming>Flow_1hlygg7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0rpmwer" sourceRef="Gateway_02dglol" targetRef="finish-event">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${result==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0rhhgz9" sourceRef="inn_start_val" targetRef="finish-event" />
+    <bpmn:sequenceFlow id="Flow_0cr7yj9" sourceRef="Gateway_1fud9jm" targetRef="finish-event">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${result==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1hlygg7" sourceRef="Gateway_145sdep" targetRef="finish-event">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${result==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="input_val" name="Input Data Validating" camunda:class="com.example.makolpaschikov.delegate.InputDataValidatingDelegator" camunda:delegateExpression="">
+      <bpmn:incoming>Flow_0qw66yv</bpmn:incoming>
+      <bpmn:outgoing>Flow_1tqndck</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0qw66yv" sourceRef="start-event" targetRef="input_val" />
+    <bpmn:sequenceFlow id="Flow_1tqndck" sourceRef="input_val" targetRef="inn_len_val" />
+  </bpmn:process>
+  <bpmn:message id="Message_1amv5ml" name="Message_1amv5ml" />
+  <bpmn:signal id="Signal_025o3l0" name="start-validate" />
+  <bpmn:error id="Error_1s3131f" name="Error_0v2lt5g" errorCode="404" camunda:errorMessage="Data cannot be null" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="validator">
+      <bpmndi:BPMNShape id="Activity_038avah_di" bpmnElement="inn_len_val">
+        <dc:Bounds x="460" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1fud9jm_di" bpmnElement="Gateway_1fud9jm" isMarkerVisible="true">
+        <dc:Bounds x="585" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="421" y="65" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0qt6l1c" bpmnElement="region_code_val">
+        <dc:Bounds x="660" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0chepk4_di" bpmnElement="start-event">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0asbuyj" bpmnElement="capital_val">
+        <dc:Bounds x="860" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_01pd1xk" bpmnElement="inn_start_val">
+        <dc:Bounds x="1060" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1o63xe7" bpmnElement="Gateway_02dglol" isMarkerVisible="true">
+        <dc:Bounds x="785" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="421" y="65" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1xw9vjy" bpmnElement="Gateway_145sdep" isMarkerVisible="true">
+        <dc:Bounds x="985" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="421" y="65" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_15h5nua_di" bpmnElement="finish-event">
+        <dc:Bounds x="1092" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0z6009i" bpmnElement="input_val">
+        <dc:Bounds x="300" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_17vy02e_di" bpmnElement="Flow_17vy02e">
+        <di:waypoint x="560" y="120" />
+        <di:waypoint x="585" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0r34f6m_di" bpmnElement="Flow_0r34f6m">
+        <di:waypoint x="635" y="120" />
+        <di:waypoint x="660" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="474" y="102" width="8" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mutt2s_di" bpmnElement="Flow_1mutt2s">
+        <di:waypoint x="760" y="120" />
+        <di:waypoint x="785" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10yefp0_di" bpmnElement="Flow_10yefp0">
+        <di:waypoint x="835" y="120" />
+        <di:waypoint x="860" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1iv36dq_di" bpmnElement="Flow_1iv36dq">
+        <di:waypoint x="960" y="120" />
+        <di:waypoint x="985" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kru7wm_di" bpmnElement="Flow_0kru7wm">
+        <di:waypoint x="1035" y="120" />
+        <di:waypoint x="1060" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rpmwer_di" bpmnElement="Flow_0rpmwer">
+        <di:waypoint x="810" y="145" />
+        <di:waypoint x="810" y="380" />
+        <di:waypoint x="1092" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rhhgz9_di" bpmnElement="Flow_0rhhgz9">
+        <di:waypoint x="1110" y="160" />
+        <di:waypoint x="1110" y="362" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cr7yj9_di" bpmnElement="Flow_0cr7yj9">
+        <di:waypoint x="610" y="145" />
+        <di:waypoint x="610" y="380" />
+        <di:waypoint x="1092" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hlygg7_di" bpmnElement="Flow_1hlygg7">
+        <di:waypoint x="1010" y="145" />
+        <di:waypoint x="1010" y="380" />
+        <di:waypoint x="1092" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qw66yv_di" bpmnElement="Flow_0qw66yv">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="300" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1tqndck_di" bpmnElement="Flow_1tqndck">
+        <di:waypoint x="400" y="120" />
+        <di:waypoint x="460" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
